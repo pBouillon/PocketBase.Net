@@ -7,12 +7,9 @@ public static class DependencyInjectionHelper
 {
     public static IServiceCollection AddPocketBase(
         this IServiceCollection services,
-        Func<PocketBaseClientConfiguration> configurationAction)
-    {
-        var pocketBaseConfiguration = configurationAction();
-
-        services.AddScoped<IPocketBaseClient>((_) => new PocketBaseClient(pocketBaseConfiguration));
-
-        return services;
-    }
+        Func<PocketBaseClientConfiguration> createPocketBaseConfigurationFunction)
+        => services
+            .AddSingleton(createPocketBaseConfigurationFunction())
+            .AddScoped<PocketBaseHttpClientWrapper>()
+            .AddScoped<IPocketBaseClient, PocketBaseClient>();
 }

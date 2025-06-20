@@ -10,7 +10,7 @@ namespace PocketBase.Net.Client;
 /// This converter is needed since PocketBase is using a variant of the ISO 8601 (<c>yyyy-MM-ddTHH:mm:ss.sssZ</c>)
 /// that does not use <c>T</c> as a separator but a space.
 /// </remarks>
-public sealed class PocketBaseDateTimeConverter : JsonConverter<DateTime>
+internal sealed class PocketBaseDateTimeConverter : JsonConverter<DateTime>
 {
     /// <summary>
     /// PocketBase's custom DateTime format
