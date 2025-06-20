@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using PocketBase.Net.Client;
+using PocketBase.Net.Client.Configuration;
 
 namespace PocketBase.Net.DependencyInjection;
 

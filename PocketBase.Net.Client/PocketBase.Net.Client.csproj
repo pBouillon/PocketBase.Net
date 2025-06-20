@@ -6,8 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="Records\zbg41fm4.1gp~" />
-  </ItemGroup>
-
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace PocketBase.Net.Client.Records.Traits;
+﻿namespace PocketBase.Net.Client.Entities.Traits;
 
 /// <summary>
 /// Trait to represent an entity that can be identified by an identifier.
@@ -6,7 +6,7 @@
 public interface IIdentifiable
 {
     /// <summary>
-    /// The entitie's identifier.
+    /// The entity's identifier.
     /// </summary>
     public string Id { get; set; }
 }

@@ -1,5 +1,6 @@
-﻿using PocketBase.Net.Client.Records;
-using PocketBase.Net.Client.Records.Users;
+﻿using PocketBase.Net.Client.Configuration;
+using PocketBase.Net.Client.Entities;
+using PocketBase.Net.Client.Entities.Users;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;

@@ -1,5 +1,6 @@
-﻿using PocketBase.Net.Client.Records;
-using PocketBase.Net.Client.Records.Users;
+﻿using PocketBase.Net.Client.Configuration;
+using PocketBase.Net.Client.Entities;
+using PocketBase.Net.Client.Entities.Users;
 
 namespace PocketBase.Net.Client;
 

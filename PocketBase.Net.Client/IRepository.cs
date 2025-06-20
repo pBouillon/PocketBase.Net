@@ -1,4 +1,4 @@
-﻿using PocketBase.Net.Client.Records;
+﻿using PocketBase.Net.Client.Entities;
 
 namespace PocketBase.Net.Client;
 

@@ -1,12 +1,12 @@
-﻿using PocketBase.Net.Client.Records.Traits;
+﻿using PocketBase.Net.Client.Entities.Traits;
 
-namespace PocketBase.Net.Client.Records;
+namespace PocketBase.Net.Client.Entities;
 
 /// <summary>
 /// Abstract base record that provides a foundation for PocketBase's records.
 /// </summary>
 public abstract record RecordBase
-    : IIdentifiable, IAuditable, ICollectionned
+    : IIdentifiable, IAuditable, ICollectionMember
 {
     /// <inheritdoc/>
     public required string Id { get; set; }
@@ -23,4 +23,3 @@ public abstract record RecordBase
     /// <inheritdoc/>
     public required string CollectionName { get; set; }
 }
-

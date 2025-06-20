@@ -1,7 +1,7 @@
-﻿using PocketBase.Net.Client.Records.Traits;
+﻿using PocketBase.Net.Client.Entities.Traits;
 using System.Text.Json.Serialization;
 
-namespace PocketBase.Net.Client.Records.Users;
+namespace PocketBase.Net.Client.Entities.Users;
 
 /// <summary>
 /// Represent a user in PocketBase

@@ -1,4 +1,4 @@
-﻿namespace PocketBase.Net.Client.Records.Traits;
+﻿namespace PocketBase.Net.Client.Entities.Traits;
 
 /// <summary>
 /// Trait representing an entity whose modification operations can be tracked.
