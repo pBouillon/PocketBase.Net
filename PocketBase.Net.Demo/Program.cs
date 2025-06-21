@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using PocketBase.Net.Client;
 using PocketBase.Net.Client.Configuration;
+using PocketBase.Net.Client.Configuration.CollectionNamingRules;
 using PocketBase.Net.Client.Entities.Records;
 using PocketBase.Net.DependencyInjection;
 
@@ -19,6 +20,26 @@ services
         RecordOperationBehavior = RecordOperationBehavior.Strict,
         ServerUrl = new Uri("http://localhost:8090"),
     })
+    .AddPocketBaseRepositories(scanningAssembly: typeof(AuthorRecord).Assembly);
+
+services
+    .AddPocketBase(
+        serverUrl: new Uri("http://localhost:8090"),
+        credentials: new PocketBaseClientCredentials
+        {
+            Identity = "technical@account.com",
+            Password = "PleaseDontHackMe",
+            CollectionName = "_superusers",
+        },
+        (pocketBaseConfiguration) =>
+        {
+            pocketBaseConfiguration.RecordOperationBehavior = RecordOperationBehavior.Strict;
+
+            pocketBaseConfiguration.CollectionNamingPipeline.AppendRule(
+                new ForRecord<AuthorRecord>((_) => "authors")
+            );
+        }
+    )
     .AddPocketBaseRepositories(scanningAssembly: typeof(AuthorRecord).Assembly);
 
 var container = services.BuildServiceProvider();

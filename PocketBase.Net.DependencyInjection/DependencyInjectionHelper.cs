@@ -13,6 +13,26 @@ namespace PocketBase.Net.DependencyInjection;
 /// </summary>
 public static class DependencyInjectionHelper
 {
+    public static IServiceCollection AddPocketBase(
+        this IServiceCollection services,
+        Uri serverUrl,
+        PocketBaseClientCredentials credentials,
+        Action<PocketBaseClientConfiguration>? mutation = null)
+    {
+        var configuration = new PocketBaseClientConfiguration
+        {
+            ServerUrl = serverUrl,
+            ClientCredentials = credentials,
+        };
+
+        mutation?.Invoke(configuration);
+
+        return services
+            .AddSingleton(configuration)
+            .AddScoped<PocketBaseHttpClientWrapper>()
+            .AddScoped<IPocketBaseClient, PocketBaseClient>();
+    }
+
     /// <summary>
     /// Adds <see cref="PocketBaseClient"/> and related services to the service collection.
     /// </summary>

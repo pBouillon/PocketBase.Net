@@ -1,7 +1,6 @@
 ﻿using PocketBase.Net.Client.Configuration;
 using PocketBase.Net.Client.Entities.Records;
 using System.Collections.Immutable;
-using System.Text.RegularExpressions;
 
 namespace PocketBase.Net.Client;
 
@@ -102,19 +101,7 @@ public class Repository<TRecord>(
     /// <summary>
     /// Gets the collection id or name associated with this repository.
     /// </summary>
-    public string CollectionName { get; init; } = GetDefaultCollectionName();
-
-    // TODO - Naming strategy / Naming override on demand
-    private static string GetDefaultCollectionName()
-    {
-        var recordName = typeof(TRecord).Name;
-
-        var withTrimmedSuffix = Regex.Replace(recordName, @"Record$", string.Empty);
-
-        var camelCaseName = char.ToLowerInvariant(withTrimmedSuffix[0]) + withTrimmedSuffix[1..];
-
-        return camelCaseName.EndsWith('s') ? camelCaseName : camelCaseName + 's';
-    }
+    public string CollectionName { get; init; } = configuration.CollectionNamingPipeline.GetCollectionNameOf<TRecord>();
 
     /// <inheritdoc/>
     public Task<TRecord> CreateRecordFrom<TPayload>(TPayload payload, CancellationToken cancellationToken = default)
