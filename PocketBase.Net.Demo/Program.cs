@@ -5,41 +5,24 @@ using PocketBase.Net.Client.Configuration.CollectionNamingRules;
 using PocketBase.Net.Client.Entities.Records;
 using PocketBase.Net.DependencyInjection;
 
-
 var services = new ServiceCollection();
 
-services
-    .AddPocketBase(() => new PocketBaseClientConfiguration
+services.AddPocketBase(
+    serverUrl: new Uri("http://localhost:8090"),
+    credentials: new PocketBaseClientCredentials
     {
-        ClientCredentials = new PocketBaseClientCredentials
-        {
-            Identity = "technical@account.com",
-            Password = "PleaseDontHackMe",
-            CollectionName = "_superusers",
-        },
-        RecordOperationBehavior = RecordOperationBehavior.Strict,
-        ServerUrl = new Uri("http://localhost:8090"),
+        Identity = "technical@account.com",
+        Password = "PleaseDontHackMe",
+        CollectionName = "_superusers",
+    },
+    (pocketBaseConfiguration) =>
+    {
+        pocketBaseConfiguration.RecordOperationBehavior = RecordOperationBehavior.Strict;
+
+        pocketBaseConfiguration.CollectionNamingPipeline.AppendRule(
+            new ForRecord<AuthorRecord>((_) => "authors")
+        );
     })
-    .AddPocketBaseRepositories(scanningAssembly: typeof(AuthorRecord).Assembly);
-
-services
-    .AddPocketBase(
-        serverUrl: new Uri("http://localhost:8090"),
-        credentials: new PocketBaseClientCredentials
-        {
-            Identity = "technical@account.com",
-            Password = "PleaseDontHackMe",
-            CollectionName = "_superusers",
-        },
-        (pocketBaseConfiguration) =>
-        {
-            pocketBaseConfiguration.RecordOperationBehavior = RecordOperationBehavior.Strict;
-
-            pocketBaseConfiguration.CollectionNamingPipeline.AppendRule(
-                new ForRecord<AuthorRecord>((_) => "authors")
-            );
-        }
-    )
     .AddPocketBaseRepositories(scanningAssembly: typeof(AuthorRecord).Assembly);
 
 var container = services.BuildServiceProvider();
@@ -55,7 +38,8 @@ var updatedAuthor = await authorRepository.UpdateRecord(
     maxBrooks with { Name = "M. Brooks" },
     onError: (payload, exception) => Console.WriteLine("Update failed"));
 
-// Definitions ---
+
+// --- Definitions ---
 
 record AuthorRecord : RecordBase
 {

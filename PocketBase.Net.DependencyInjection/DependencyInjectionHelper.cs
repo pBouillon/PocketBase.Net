@@ -13,6 +13,14 @@ namespace PocketBase.Net.DependencyInjection;
 /// </summary>
 public static class DependencyInjectionHelper
 {
+    /// <summary>
+    /// Adds <see cref="PocketBaseClient"/> and related services to the service collection.
+    /// </summary>
+    /// <param name="services">The service collection to add to.</param>
+    /// <param name="serverUrl">The URL on which the PocketBase instance is running.</param>
+    /// <param name="credentials">The credentials to be used to authenticate to the PocketBase instance.</param>
+    /// <param name="mutation">An optional configuration of the <see cref="PocketBaseClientConfiguration"/>.</param>
+    /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddPocketBase(
         this IServiceCollection services,
         Uri serverUrl,
@@ -32,20 +40,6 @@ public static class DependencyInjectionHelper
             .AddScoped<PocketBaseHttpClientWrapper>()
             .AddScoped<IPocketBaseClient, PocketBaseClient>();
     }
-
-    /// <summary>
-    /// Adds <see cref="PocketBaseClient"/> and related services to the service collection.
-    /// </summary>
-    /// <param name="services">The service collection to add to.</param>
-    /// <param name="createPocketBaseConfigurationFunction">A function that creates a <see cref="PocketBaseClientConfiguration"/>.</param>
-    /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddPocketBase(
-        this IServiceCollection services,
-        Func<PocketBaseClientConfiguration> createPocketBaseConfigurationFunction)
-        => services
-            .AddSingleton(createPocketBaseConfigurationFunction())
-            .AddScoped<PocketBaseHttpClientWrapper>()
-            .AddScoped<IPocketBaseClient, PocketBaseClient>();
 
     /// <summary>
     /// Adds PocketBase repositories to the service collection by scanning the specified assembly.
