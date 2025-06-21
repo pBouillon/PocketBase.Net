@@ -26,7 +26,7 @@ public interface IRepository<TRecord>
     /// <param name="onError">An action to execute upon error.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The newly created record of type <typeparamref name="TRecord"/>.</returns>
-    Task<TRecord?> CreateRecordOr<TPayload>(
+    Task<TRecord?> CreateRecordFrom<TPayload>(
         TPayload payload,
         Action<TPayload, Exception> onError,
         CancellationToken cancellationToken = default);
@@ -52,7 +52,7 @@ public abstract class BaseRepository<TRecord>(IPocketBaseClient pocketBaseClient
         => pocketBaseClient.SendPost<TPayload, TRecord>(CollectionIdOrName, payload, cancellationToken);
 
     /// <inheritdoc/>
-    public async Task<TRecord?> CreateRecordOr<TPayload>(
+    public async Task<TRecord?> CreateRecordFrom<TPayload>(
         TPayload payload,
         Action<TPayload, Exception> onError,
         CancellationToken cancellationToken = default)
