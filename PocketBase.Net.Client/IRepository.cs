@@ -1,4 +1,4 @@
-﻿using PocketBase.Net.Client.Entities;
+﻿using PocketBase.Net.Client.Entities.Records;
 
 namespace PocketBase.Net.Client;
 
@@ -13,10 +13,23 @@ public interface IRepository<TRecord>
     /// Creates a new record.
     /// </summary>
     /// <typeparam name="TPayload">The type of the payload to create the record.</typeparam>
-    /// <param name="record">The payload containing the data used to create the new record.</param>
+    /// <param name="payload">The payload containing the data used to create the new record.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The newly created record of type <typeparamref name="TRecord"/>.</returns>
-    Task<TRecord> CreateRecord<TPayload>(TPayload record, CancellationToken cancellationToken);
+    Task<TRecord> CreateRecordFrom<TPayload>(TPayload payload, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Creates a new record. Upon error, invoke <paramref name="onError"/> instead of throwing and returns <c>null</c>.
+    /// </summary>
+    /// <typeparam name="TPayload">The type of the payload to create the record.</typeparam>
+    /// <param name="payload">The payload containing the data used to create the new record.</param>
+    /// <param name="onError">An action to execute upon error.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>The newly created record of type <typeparamref name="TRecord"/>.</returns>
+    Task<TRecord?> CreateRecordOr<TPayload>(
+        TPayload payload,
+        Action<TPayload, Exception> onError,
+        CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -33,10 +46,25 @@ public abstract class BaseRepository<TRecord>(IPocketBaseClient pocketBaseClient
     /// </summary>
     public abstract string CollectionIdOrName { get; }
 
-    // TODO - Add hooks (on create, on success, ...)
-
     /// <inheritdoc/>
-    public Task<TRecord> CreateRecord<TPayload>(TPayload payload, CancellationToken cancellationToken = default)
+    public Task<TRecord> CreateRecordFrom<TPayload>(TPayload payload, CancellationToken cancellationToken = default)
         // TODO - Handle errors (collection non-existent, unauthenticated, ...)
         => pocketBaseClient.SendPost<TPayload, TRecord>(CollectionIdOrName, payload, cancellationToken);
+
+    /// <inheritdoc/>
+    public async Task<TRecord?> CreateRecordOr<TPayload>(
+        TPayload payload,
+        Action<TPayload, Exception> onError,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await CreateRecordFrom(payload, cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            onError.Invoke(payload, exception);
+            return null;
+        }
+    }
 }

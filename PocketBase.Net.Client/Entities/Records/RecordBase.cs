@@ -1,6 +1,6 @@
 ﻿using PocketBase.Net.Client.Entities.Traits;
 
-namespace PocketBase.Net.Client.Entities;
+namespace PocketBase.Net.Client.Entities.Records;
 
 /// <summary>
 /// Abstract base record that provides a foundation for PocketBase's records.

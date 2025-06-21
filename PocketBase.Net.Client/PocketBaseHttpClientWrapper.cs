@@ -1,6 +1,7 @@
 ﻿using PocketBase.Net.Client.Configuration;
-using PocketBase.Net.Client.Entities;
+using PocketBase.Net.Client.Entities.Records;
 using PocketBase.Net.Client.Entities.Users;
+using PocketBase.Net.Client.Exceptions;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -57,20 +58,21 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
 
         if (!response.IsSuccessStatusCode)
         {
-            // TODO - Error handling
+            throw new AuthenticationFailedException
+            {
+                Response = response.Content,
+                StatusCode = response.StatusCode,
+            };
         }
-
+        
         var rawContent = await response.Content.ReadAsStringAsync(cancellationToken);
-        var authenticationResult = JsonSerializer.Deserialize<Authenticated<PocketBaseUser>>(rawContent, _jsonSerializerOptions);
 
-        if (authenticationResult is null)
-        {
-            // TODO - Error handling
-        }
+        var authenticated = JsonSerializer.Deserialize<Authenticated<PocketBaseUser>>(rawContent, _jsonSerializerOptions)
+            ?? throw new MalformedResponseException<Authenticated<PocketBaseUser>> { Received = rawContent };
 
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authenticationResult.Token);
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authenticated.Token);
 
-        return authenticationResult.User;
+        return authenticated.User;
     }
 
     /// <summary>
@@ -101,18 +103,28 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
 
         if (!response.IsSuccessStatusCode)
         {
-            // TODO - Error handling
+            throw new RecordCreationFailedException
+            {
+                Payload = payload,
+                RequestMessage = response.RequestMessage!,
+                Response = response.Content,
+            };
         }
 
         var rawContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        // TODO - Strengthen error check
-        return JsonSerializer.Deserialize<TRecord>(rawContent, _jsonSerializerOptions);
+        return JsonSerializer.Deserialize<TRecord>(rawContent, _jsonSerializerOptions)
+            ?? throw new MalformedResponseException<TRecord> { Received = rawContent };
     }
 
+    /// <summary>
+    /// Attempt to authenticate the client according to the configuration behavior.
+    /// </summary>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>The authenticated <see cref="PocketBaseUser"/>.</returns>
+    /// <exception cref="UnauthenticatedClientException"></exception>
     private Task<PocketBaseUser> HandleUnauthenticatedClient(CancellationToken cancellationToken)
         => configuration.UseSilentAuthentication
             ? AuthenticateUsing(configuration.ClientCredentials, cancellationToken)
-            // TODO - Custom Exception
-            : throw new Exception();
+            : throw new UnauthenticatedClientException();
 }
