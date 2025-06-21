@@ -33,6 +33,25 @@ public interface IPocketBaseClient
         TPayload payload,
         CancellationToken cancellation = default
     ) where TRecord : RecordBase;
+
+    /// <summary>
+    /// Sends a PATCH request to the web API to a specified collection to update a given record.
+    /// </summary>
+    /// <remarks>
+    /// <see href="https://pocketbase.io/docs/api-records/#update-record"/>
+    /// </remarks>
+    /// <typeparam name="TRecord">The type of the expected response, which should be a subclass of <see cref="RecordBase"/>.</typeparam>
+    /// <param name="collectionIdOrName">The id or name of the collection where the record will be created.</param>
+    /// <param name="recordId">The id of the record to update.</param>
+    /// <param name="payload">A <see cref="IDictionary"/> of properties to update.</param>
+    /// <param name="cancellation">A cancellation token to cancel the operation.</param>
+    /// <returns>The updated record of type <typeparamref name="TRecord"/>.</returns>
+    Task<TRecord> SendPatch<TRecord>(
+        string collectionIdOrName,
+        string recordId,
+        IDictionary<string, object?> payload,
+        CancellationToken cancellation = default
+    ) where TRecord : RecordBase;
 }
 
 /// <summary>
@@ -56,4 +75,13 @@ public class PocketBaseClient(
         CancellationToken cancellation = default
     ) where TRecord : RecordBase
         => httpClientWrapper.CreateRecord<TPayload, TRecord>(collectionIdOrName, payload, cancellation);
+
+    /// <inheritdoc/>
+    public Task<TRecord> SendPatch<TRecord>(
+        string collectionIdOrName,
+        string recordId,
+        IDictionary<string, object?> payload,
+        CancellationToken cancellation = default
+    ) where TRecord : RecordBase
+        => httpClientWrapper.UpdateRecord<TRecord>(collectionIdOrName, recordId, payload, cancellation);
 }

@@ -27,6 +27,7 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
     {
         PropertyNameCaseInsensitive = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
         Converters = { new PocketBaseDateTimeConverter() },
     };
 
@@ -127,4 +128,39 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
         => configuration.UseSilentAuthentication
             ? AuthenticateUsing(configuration.ClientCredentials, cancellationToken)
             : throw new UnauthenticatedClientException();
+
+    public async Task<TRecord> UpdateRecord<TRecord>(
+        string collectionIdOrName,
+        string recordId,
+        IDictionary<string, object?> payload,
+        CancellationToken cancellationToken
+    ) where TRecord : RecordBase
+    {
+        if (!IsAuthenticated)
+        {
+            await HandleUnauthenticatedClient(cancellationToken);
+        }
+
+        using var response = await _httpClient.PatchAsJsonAsync(
+           $"/api/collections/{collectionIdOrName}/records/{recordId}",
+           payload,
+           _jsonSerializerOptions,
+           cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new RecordUpdateFailedException
+            {
+                RecordId = recordId,
+                Payload = payload,
+                RequestMessage = response.RequestMessage!,
+                Response = response.Content,
+            };
+        }
+
+        var rawContent = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        return JsonSerializer.Deserialize<TRecord>(rawContent, _jsonSerializerOptions)
+            ?? throw new MalformedResponseException<TRecord> { Received = rawContent };
+    }
 }

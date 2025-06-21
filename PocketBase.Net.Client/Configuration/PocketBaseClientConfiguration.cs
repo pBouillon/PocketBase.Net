@@ -13,11 +13,16 @@ public record PocketBaseClientConfiguration
     /// <summary>
     /// The <see cref="PocketBaseClientCredentials"/> to be used to authenticate the <see cref="PocketBaseClient"/>.
     /// </summary>
-    public required PocketBaseClientCredentials ClientCredentials { get; set; }
+    public required PocketBaseClientCredentials ClientCredentials { get; init; }
 
     /// <summary>
     /// If <c>true</c>, the <see cref="IPocketBaseClient"/> will invoke <see cref="IPocketBaseClient.Authenticate"/>
     /// when first interacting with PocketBase
     /// </summary>
-    public bool UseSilentAuthentication { get; set; } = true;
+    public bool UseSilentAuthentication { get; init; } = true;
+
+    /// <summary>
+    /// Define the validation behavior for record operations.
+    /// </summary>
+    public RecordOperationBehavior RecordOperationBehavior { get; init; } = RecordOperationBehavior.Strict;
 }

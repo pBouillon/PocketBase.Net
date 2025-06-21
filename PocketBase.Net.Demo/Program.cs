@@ -1,21 +1,42 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using PocketBase.Net.Client;
+using PocketBase.Net.Client.Configuration;
+using PocketBase.Net.Client.Entities.Records;
 using PocketBase.Net.DependencyInjection;
+
 
 var services = new ServiceCollection();
 
-services.AddPocketBase(() => new PocketBaseClientConfiguration
-{
-    ServerUrl = new Uri("http://localhost:8090"),
-    ClientCredentials = new PocketBaseClientCredentials
+services
+    .AddPocketBase(() => new PocketBaseClientConfiguration
     {
-        Identity = "technical@account.com",
-        Password = "PleaseDontHackMe",
-        CollectionName = "_superusers",
-    },
-});
+        ClientCredentials = new PocketBaseClientCredentials
+        {
+            Identity = "technical@account.com",
+            Password = "PleaseDontHackMe",
+            CollectionName = "_superusers",
+        },
+        RecordOperationBehavior = RecordOperationBehavior.Strict,
+        ServerUrl = new Uri("http://localhost:8090"),
+    })
+    .AddPocketBaseRepositories(scanningAssembly: typeof(AuthorRecord).Assembly);
 
 var container = services.BuildServiceProvider();
 
-var pocketBaseClient = container.GetRequiredService<IPocketBaseClient>();
-var user = await pocketBaseClient.Authenticate();
+var authorRepository = container.GetRequiredService<IRepository<AuthorRecord>>();
+
+var maxBrooks = new { Name = "Max Brooks" };
+
+var authorRecord = await authorRepository.CreateRecordFrom(maxBrooks);
+
+var updatedAuthor = await authorRepository.UpdateRecord(
+    authorRecord.Id,
+    maxBrooks with { Name = "M. Brooks" },
+    onError: (payload, exception) => Console.WriteLine("Update failed"));
+
+// Definitions ---
+
+record AuthorRecord : RecordBase
+{
+    public string Name { get; init; } = null!;
+}

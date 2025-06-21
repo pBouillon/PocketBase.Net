@@ -1,4 +1,7 @@
 ﻿using PocketBase.Net.Client.Entities.Traits;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace PocketBase.Net.Client.Entities.Records;
 
