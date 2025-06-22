@@ -1,6 +1,5 @@
 ﻿using PocketBase.Net.Client.Configuration.CollectionNamingRules;
 using PocketBase.Net.Client.Entities.Records;
-using System.Collections.Concurrent;
 
 namespace PocketBase.Net.Client.Configuration;
 
@@ -8,9 +7,9 @@ namespace PocketBase.Net.Client.Configuration;
 /// Pipeline that generates collection names for record types by applying a series of naming rules.
 /// Implements caching to avoid recomputing names for the same type.
 /// </summary>
-public sealed class RepositoryNamingPipeline()
+public sealed class RepositoryNamingPipeline
 {
-    private readonly ConcurrentDictionary<Type, string> _nameCache = new();
+    private readonly IDictionary<Type, string> _nameCache = new Dictionary<Type, string>();
 
     private static readonly Queue<ICollectionNamingRule> _defaultNamingRulesPipeline = new([
         new SeedWithTypeName(),
@@ -37,6 +36,8 @@ public sealed class RepositoryNamingPipeline()
     /// <returns>The current instance to chain calls.</returns>
     public RepositoryNamingPipeline AppendRules(params ICollectionNamingRule[] newRules)
     {
+        _namingRulesPipeline.Clear();
+
         newRules
             .ToList()
             .ForEach(_namingRulesPipeline.Enqueue);
@@ -51,11 +52,23 @@ public sealed class RepositoryNamingPipeline()
     /// <returns>The generated collection name for the record type.</returns>
     public string GetCollectionNameOf<TRecord>()
         where TRecord : RecordBase
-            => _nameCache.GetOrAdd(
-                typeof(TRecord),
-                _namingRulesPipeline.Aggregate(
-                    seed: string.Empty,
-                    (current, rule) => rule.BuildNameFor<TRecord>(current)));
+    {
+        var cacheKey = typeof(TRecord);
+
+        var isCacheHit = _nameCache.ContainsKey(typeof(TRecord));
+        if (isCacheHit)
+        {
+            return _nameCache[typeof(TRecord)];
+        }
+
+        var collectionName = _namingRulesPipeline.Aggregate(
+            seed: string.Empty,
+            (current, rule) => rule.BuildNameFor<TRecord>(current));
+
+        _nameCache.Add(cacheKey, collectionName);
+
+        return collectionName;
+    }
 
     /// <summary>
     /// Replaces the current naming rules pipeline with a new set of rules.
