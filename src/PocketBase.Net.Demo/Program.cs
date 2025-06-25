@@ -36,6 +36,8 @@ var updatedAuthor = await authorRepository.UpdateRecord(
     authorRecord!.Id,
     maxBrooks with { Name = "M. Brooks" });
 
+var fetchedAuthor = await authorRepository.GetRecord(authorRecord.Id);
+
 await authorRepository.DeleteRecord(authorRecord.Id);
 
 // --- Definitions ---

@@ -64,7 +64,7 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
                 StatusCode = response.StatusCode,
             };
         }
-        
+
         var rawContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
         var authenticated = JsonSerializer.Deserialize<Authenticated<PocketBaseUser>>(rawContent, _jsonSerializerOptions)
@@ -146,6 +146,27 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
                 Response = response.Content,
             };
         }
+    }
+
+    public async Task<TRecord> SendGet<TRecord>(
+        string collectionIdOrName,
+        string recordId,
+        CancellationToken cancellationToken
+    )
+    {
+        using var response = await _httpClient.GetAsync(
+            $"/api/collections/{collectionIdOrName}/records/{recordId}",
+            cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new RecordSearchFailedException();
+        }
+
+        var rawContent = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        return JsonSerializer.Deserialize<TRecord>(rawContent, _jsonSerializerOptions)
+            ?? throw new MalformedResponseException<TRecord> { Received = rawContent };
     }
 
     /// <summary>

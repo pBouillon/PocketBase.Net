@@ -53,6 +53,17 @@ public interface IRepository<TRecord>
         Action<Exception> onError,
         CancellationToken cancellationToken = default);
 
+    // TODO - Docs
+    Task<TRecord> GetRecord(
+        string recordId,
+        CancellationToken cancellationToken = default);
+
+    // TODO - Docs
+    Task<TRecord?> GetRecord(
+        string recordId,
+        Action<string, Exception> onError,
+        CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Updates an existing record with the provided payload.
     /// </summary>
@@ -119,7 +130,7 @@ public class Repository<TRecord>(
     where TRecord : RecordBase
 {
     /// <summary>
-    /// Gets the collection id or name associated with this repository.
+    /// Gets the collecti/// <inheritdoc/>on id or name associated with this repository.
     /// </summary>
     public string CollectionName { get; init; } = configuration.CollectionNamingPipeline.GetCollectionNameOf<TRecord>();
 
@@ -144,9 +155,11 @@ public class Repository<TRecord>(
         }
     }
 
+    /// <inheritdoc/>
     public Task DeleteRecord(string recordId, CancellationToken cancellationToken = default)
         => pocketBaseClient.DeleteRecord(CollectionName, recordId, cancellationToken);
 
+    /// <inheritdoc/>
     public async Task DeleteRecord(string recordId, Action<Exception> onError, CancellationToken cancellationToken = default)
     {
         try
@@ -156,6 +169,24 @@ public class Repository<TRecord>(
         catch (Exception exception)
         {
             onError.Invoke(exception);
+        }
+    }
+
+    /// <inheritdoc/>
+    public Task<TRecord> GetRecord(string recordId, CancellationToken cancellationToken = default)
+        => pocketBaseClient.GetRecord<TRecord>(CollectionName, recordId, cancellationToken);
+
+    /// <inheritdoc/>
+    public async Task<TRecord?> GetRecord(string recordId, Action<string, Exception> onError, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await GetRecord(recordId, cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            onError.Invoke(recordId, exception);
+            return null;
         }
     }
 

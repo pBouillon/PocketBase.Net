@@ -17,21 +17,6 @@ public interface IPocketBaseClient
     Task<PocketBaseUser> Authenticate(CancellationToken cancellation = default);
 
     /// <summary>
-    /// Sends a DELETE request to the web API to a specified collection to delete a record by its id.
-    /// </summary>
-    /// <remarks>
-    /// <see href="https://pocketbase.io/docs/api-records/#delete-record"/>
-    /// </remarks>
-    /// <param name="collectionIdOrName">The id or name of the collection where the record will be deleted.</param>
-    /// <param name="recordId">The id of the record to delete.</param>
-    /// <param name="cancellation">A cancellation token to cancel the operation.</param>
-    Task DeleteRecord(
-        string collectionIdOrName,
-        string recordId,
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
     /// Sends a POST request to the web API to a specified collection to create a new record.
     /// </summary>
     /// <remarks>
@@ -48,6 +33,27 @@ public interface IPocketBaseClient
         TPayload payload,
         CancellationToken cancellation = default
     ) where TRecord : RecordBase;
+
+    /// <summary>
+    /// Sends a DELETE request to the web API to a specified collection to delete a record by its id.
+    /// </summary>
+    /// <remarks>
+    /// <see href="https://pocketbase.io/docs/api-records/#delete-record"/>
+    /// </remarks>
+    /// <param name="collectionIdOrName">The id or name of the collection where the record will be deleted.</param>
+    /// <param name="recordId">The id of the record to delete.</param>
+    /// <param name="cancellation">A cancellation token to cancel the operation.</param>
+    Task DeleteRecord(
+        string collectionIdOrName,
+        string recordId,
+        CancellationToken cancellationToken = default
+    );
+
+    Task<TRecord> GetRecord<TRecord>(
+        string collectionIdOrName,
+        string recordId,
+        CancellationToken cancellation = default
+     ) where TRecord : RecordBase;
 
     /// <summary>
     /// Sends a PATCH request to the web API to a specified collection to update a given record.
@@ -84,6 +90,14 @@ public class PocketBaseClient(
         => httpClientWrapper.AuthenticateUsing(configuration.ClientCredentials, cancellation);
 
     /// <inheritdoc/>
+    public Task<TRecord> CreateRecord<TPayload, TRecord>(
+        string collectionIdOrName,
+        TPayload payload,
+        CancellationToken cancellation = default
+    ) where TRecord : RecordBase
+        => httpClientWrapper.SendPost<TPayload, TRecord>(collectionIdOrName, payload, cancellation);
+
+    /// <inheritdoc/>
     public Task DeleteRecord(
         string collectionIdOrName,
         string recordId,
@@ -92,12 +106,12 @@ public class PocketBaseClient(
         => httpClientWrapper.SendDelete(collectionIdOrName, recordId, cancellationToken);
 
     /// <inheritdoc/>
-    public Task<TRecord> CreateRecord<TPayload, TRecord>(
+    public Task<TRecord> GetRecord<TRecord>(
         string collectionIdOrName,
-        TPayload payload,
-        CancellationToken cancellation = default
+        string recordId,
+        CancellationToken cancellationToken = default
     ) where TRecord : RecordBase
-        => httpClientWrapper.SendPost<TPayload, TRecord>(collectionIdOrName, payload, cancellation);
+        => httpClientWrapper.SendGet<TRecord>(collectionIdOrName, recordId, cancellationToken);
 
     /// <inheritdoc/>
     public Task<TRecord> UpdateRecord<TRecord>(

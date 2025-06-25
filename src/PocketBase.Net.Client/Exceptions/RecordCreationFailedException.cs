@@ -1,7 +1,7 @@
 ﻿namespace PocketBase.Net.Client.Exceptions;
 
 public sealed class RecordCreationFailedException()
-    : Exception("The creation of the new record failed")
+    : PocketBaseException("The creation of the new record failed")
 {
     public required object? Payload { get; init; }
 
