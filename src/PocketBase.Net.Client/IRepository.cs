@@ -43,7 +43,7 @@ public interface IRepository<TRecord>
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Delete an existing record. Upon error, invoke <paramref name="onError"/> instead of throwing.
+    /// Delete an existing record. Upon error, invoke <paramref name="onError"/> instead of throwing and returns <c>null</c>.
     /// </summary>
     /// <param name="recordId">The ID of the record to delete.</param>
     /// <param name="onError">An action to execute upon error.</param>
@@ -53,12 +53,24 @@ public interface IRepository<TRecord>
         Action<Exception> onError,
         CancellationToken cancellationToken = default);
 
-    // TODO - Docs
+    /// <summary>
+    /// Retrieve a record.
+    /// </summary>
+    /// <param name="recordId">The ID of the record to retrieve.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>The retrieved record of type <typeparamref name="TRecord"/>.</returns>
     Task<TRecord> GetRecord(
         string recordId,
         CancellationToken cancellationToken = default);
 
-    // TODO - Docs
+    /// <summary>
+    /// Retrieve an existing record. Upon error, invoke <paramref name="onError"/>
+    /// instead of throwing and returns <c>null</c>.
+    /// </summary>
+    /// <param name="recordId">The ID of the record to retrieve.</param>
+    /// <param name="onError">An action to execute upon error.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>The retrieved record of type <typeparamref name="TRecord"/>.</returns>
     Task<TRecord?> GetRecord(
         string recordId,
         Action<string, Exception> onError,

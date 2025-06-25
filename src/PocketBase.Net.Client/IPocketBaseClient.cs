@@ -49,6 +49,16 @@ public interface IPocketBaseClient
         CancellationToken cancellationToken = default
     );
 
+    /// <summary>
+    /// Sends a GET request to the web API to a specified collection to get a record by its id.
+    /// </summary>
+    /// <remarks>
+    /// <see href="https://pocketbase.io/docs/api-records/#view-record"/>
+    /// </remarks>
+    /// <param name="collectionIdOrName">The id or name of the collection from which the record will be retrieved.</param>
+    /// <param name="recordId">The id of the record to retrieve.</param>
+    /// <param name="cancellation">A cancellation token to cancel the operation.</param>
+    /// <returns>The retrieved record.</returns>
     Task<TRecord> GetRecord<TRecord>(
         string collectionIdOrName,
         string recordId,

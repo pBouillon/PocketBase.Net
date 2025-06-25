@@ -148,6 +148,14 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
         }
     }
 
+    /// <summary>
+    /// Send a GET request to a collection to retrive an existing record
+    /// </summary>
+    /// <typeparam name="TRecord">The type of the expected response.</typeparam>
+    /// <param name="collectionIdOrName">The collection id or name in which the record is.</param>
+    /// <param name="recordId">The id of the record to retrieve.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>The retrieved <typeparamref name="TRecord"/>.</returns>
     public async Task<TRecord> SendGet<TRecord>(
         string collectionIdOrName,
         string recordId,
