@@ -22,8 +22,7 @@ services.AddPocketBase(
         pocketBaseConfiguration.CollectionNamingPipeline.AppendRule(
             new ForRecord<AuthorRecord>((_) => "authors")
         );
-    })
-    .AddPocketBaseRepositories(scanningAssembly: typeof(AuthorRecord).Assembly);
+    }).AddPocketBaseRepositories(scanningAssembly: typeof(AuthorRecord).Assembly);
 
 var container = services.BuildServiceProvider();
 
@@ -34,10 +33,10 @@ var maxBrooks = new { Name = "Max Brooks" };
 var authorRecord = await authorRepository.CreateRecordFrom(maxBrooks);
 
 var updatedAuthor = await authorRepository.UpdateRecord(
-    authorRecord.Id,
-    maxBrooks with { Name = "M. Brooks" },
-    onError: (payload, exception) => Console.WriteLine("Update failed"));
+    authorRecord!.Id,
+    maxBrooks with { Name = "M. Brooks" });
 
+await authorRepository.DeleteRecord(authorRecord.Id);
 
 // --- Definitions ---
 

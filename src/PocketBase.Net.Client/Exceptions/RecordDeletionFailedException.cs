@@ -1,11 +1,9 @@
 ﻿namespace PocketBase.Net.Client.Exceptions;
 
-public sealed class RecordUpdateFailedException()
-    : PocketBaseException("The update of the record failed")
+public sealed class RecordDeletionFailedException()
+    : PocketBaseException("The deletion of the record failed")
 {
     public required string RecordId { get; init; }
-
-    public required object? Payload { get; init; }
 
     public required HttpRequestMessage RequestMessage { get; init; }
 

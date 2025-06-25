@@ -34,6 +34,26 @@ public interface IRepository<TRecord>
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Delete an existing record..
+    /// </summary>
+    /// <param name="recordId">The ID of the record to delete.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    Task DeleteRecord(
+        string recordId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Delete an existing record. Upon error, invoke <paramref name="onError"/> instead of throwing.
+    /// </summary>
+    /// <param name="recordId">The ID of the record to delete.</param>
+    /// <param name="onError">An action to execute upon error.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    Task DeleteRecord(
+        string recordId,
+        Action<Exception> onError,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Updates an existing record with the provided payload.
     /// </summary>
     /// <param name="recordId">The ID of the record to update.</param>
@@ -105,11 +125,7 @@ public class Repository<TRecord>(
 
     /// <inheritdoc/>
     public Task<TRecord> CreateRecordFrom<TPayload>(TPayload payload, CancellationToken cancellationToken = default)
-    {
-        // TODO - Check against validator
-
-        return pocketBaseClient.SendPost<TPayload, TRecord>(CollectionName, payload, cancellationToken);
-    }
+        => pocketBaseClient.SendPost<TPayload, TRecord>(CollectionName, payload, cancellationToken);
 
     /// <inheritdoc/>
     public async Task<TRecord?> CreateRecordFrom<TPayload>(
@@ -125,6 +141,21 @@ public class Repository<TRecord>(
         {
             onError.Invoke(payload, exception);
             return null;
+        }
+    }
+
+    public Task DeleteRecord(string recordId, CancellationToken cancellationToken = default)
+        => pocketBaseClient.SendDelete(CollectionName, recordId, cancellationToken);
+
+    public async Task DeleteRecord(string recordId, Action<Exception> onError, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await DeleteRecord(recordId, cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            onError.Invoke(exception);
         }
     }
 

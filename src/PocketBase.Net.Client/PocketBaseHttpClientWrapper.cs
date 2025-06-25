@@ -22,7 +22,6 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
     /// <summary>
     /// Serialization options when emitting HTTP requests to the PocketBase API.
     /// </summary>
-    // TODO - Allow customization in DI
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -116,6 +115,37 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
 
         return JsonSerializer.Deserialize<TRecord>(rawContent, _jsonSerializerOptions)
             ?? throw new MalformedResponseException<TRecord> { Received = rawContent };
+    }
+
+    /// <summary>
+    /// Send a DELETE request to a collection to delete an existing record.
+    /// </summary>
+    /// <param name="collectionIdOrName">The collection id or name in which the record will be deleted.</param>
+    /// <param name="recordId">The id of the record to delete..</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    public async Task DeleteRecord(
+        string collectionIdOrName,
+        string recordId,
+        CancellationToken cancellationToken)
+    {
+        if (!IsAuthenticated)
+        {
+            await HandleUnauthenticatedClient(cancellationToken);
+        }
+
+        using var response = await _httpClient.DeleteAsync(
+            $"/api/collections/{collectionIdOrName}/records/{recordId}",
+            cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new RecordDeletionFailedException
+            {
+                RecordId = recordId,
+                RequestMessage = response.RequestMessage!,
+                Response = response.Content,
+            };
+        }
     }
 
     /// <summary>
