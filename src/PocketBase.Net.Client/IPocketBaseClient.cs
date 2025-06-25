@@ -25,7 +25,7 @@ public interface IPocketBaseClient
     /// <param name="collectionIdOrName">The id or name of the collection where the record will be deleted.</param>
     /// <param name="recordId">The id of the record to delete.</param>
     /// <param name="cancellation">A cancellation token to cancel the operation.</param>
-    Task SendDelete(
+    Task DeleteRecord(
         string collectionIdOrName,
         string recordId,
         CancellationToken cancellationToken = default
@@ -43,7 +43,7 @@ public interface IPocketBaseClient
     /// <param name="payload">The payload to be serialized as the body of the POST request.</param>
     /// <param name="cancellation">A cancellation token to cancel the operation.</param>
     /// <returns>The newly created record of type <typeparamref name="TRecord"/>.</returns>
-    Task<TRecord> SendPost<TPayload, TRecord>(
+    Task<TRecord> CreateRecord<TPayload, TRecord>(
         string collectionIdOrName,
         TPayload payload,
         CancellationToken cancellation = default
@@ -61,7 +61,7 @@ public interface IPocketBaseClient
     /// <param name="payload">A <see cref="IDictionary"/> of properties to update.</param>
     /// <param name="cancellation">A cancellation token to cancel the operation.</param>
     /// <returns>The updated record of type <typeparamref name="TRecord"/>.</returns>
-    Task<TRecord> SendPatch<TRecord>(
+    Task<TRecord> UpdateRecord<TRecord>(
         string collectionIdOrName,
         string recordId,
         IDictionary<string, object?> payload,
@@ -84,27 +84,27 @@ public class PocketBaseClient(
         => httpClientWrapper.AuthenticateUsing(configuration.ClientCredentials, cancellation);
 
     /// <inheritdoc/>
-    public Task SendDelete(
+    public Task DeleteRecord(
         string collectionIdOrName,
         string recordId,
         CancellationToken cancellationToken = default
     )
-        => httpClientWrapper.DeleteRecord(collectionIdOrName, recordId, cancellationToken);
+        => httpClientWrapper.SendDelete(collectionIdOrName, recordId, cancellationToken);
 
     /// <inheritdoc/>
-    public Task<TRecord> SendPost<TPayload, TRecord>(
+    public Task<TRecord> CreateRecord<TPayload, TRecord>(
         string collectionIdOrName,
         TPayload payload,
         CancellationToken cancellation = default
     ) where TRecord : RecordBase
-        => httpClientWrapper.CreateRecord<TPayload, TRecord>(collectionIdOrName, payload, cancellation);
+        => httpClientWrapper.SendPost<TPayload, TRecord>(collectionIdOrName, payload, cancellation);
 
     /// <inheritdoc/>
-    public Task<TRecord> SendPatch<TRecord>(
+    public Task<TRecord> UpdateRecord<TRecord>(
         string collectionIdOrName,
         string recordId,
         IDictionary<string, object?> payload,
         CancellationToken cancellation = default
     ) where TRecord : RecordBase
-        => httpClientWrapper.UpdateRecord<TRecord>(collectionIdOrName, recordId, payload, cancellation);
+        => httpClientWrapper.SendPatch<TRecord>(collectionIdOrName, recordId, payload, cancellation);
 }

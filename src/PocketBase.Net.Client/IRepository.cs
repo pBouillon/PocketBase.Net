@@ -125,7 +125,7 @@ public class Repository<TRecord>(
 
     /// <inheritdoc/>
     public Task<TRecord> CreateRecordFrom<TPayload>(TPayload payload, CancellationToken cancellationToken = default)
-        => pocketBaseClient.SendPost<TPayload, TRecord>(CollectionName, payload, cancellationToken);
+        => pocketBaseClient.CreateRecord<TPayload, TRecord>(CollectionName, payload, cancellationToken);
 
     /// <inheritdoc/>
     public async Task<TRecord?> CreateRecordFrom<TPayload>(
@@ -145,7 +145,7 @@ public class Repository<TRecord>(
     }
 
     public Task DeleteRecord(string recordId, CancellationToken cancellationToken = default)
-        => pocketBaseClient.SendDelete(CollectionName, recordId, cancellationToken);
+        => pocketBaseClient.DeleteRecord(CollectionName, recordId, cancellationToken);
 
     public async Task DeleteRecord(string recordId, Action<Exception> onError, CancellationToken cancellationToken = default)
     {
@@ -181,7 +181,7 @@ public class Repository<TRecord>(
             validator.ThrowOnMismatchedPropertyTypesIn(payload);
         }
 
-        return pocketBaseClient.SendPatch<TRecord>(CollectionName, recordId, payload, cancellationToken);
+        return pocketBaseClient.UpdateRecord<TRecord>(CollectionName, recordId, payload, cancellationToken);
     }
 
     /// <inheritdoc/>

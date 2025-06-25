@@ -84,7 +84,7 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
     /// <param name="payload">The content to be serialized as the body of the POST request.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The newly created <typeparamref name="TRecord"/> on success.</returns>
-    public async Task<TRecord> CreateRecord<TPayload, TRecord>(
+    public async Task<TRecord> SendPost<TPayload, TRecord>(
         string collectionIdOrName,
         TPayload payload,
         CancellationToken cancellationToken
@@ -123,7 +123,7 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
     /// <param name="collectionIdOrName">The collection id or name in which the record will be deleted.</param>
     /// <param name="recordId">The id of the record to delete..</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    public async Task DeleteRecord(
+    public async Task SendDelete(
         string collectionIdOrName,
         string recordId,
         CancellationToken cancellationToken)
@@ -159,7 +159,16 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
             ? AuthenticateUsing(configuration.ClientCredentials, cancellationToken)
             : throw new UnauthenticatedClientException();
 
-    public async Task<TRecord> UpdateRecord<TRecord>(
+    /// <summary>
+    /// Send a PATCH request to a collection to update an existing record
+    /// </summary>
+    /// <typeparam name="TRecord">The type of the expected response.</typeparam>
+    /// <param name="collectionIdOrName">The collection id or name in which the record will be updated.</param>
+    /// <param name="recordId">The id of the record to update.</param>
+    /// <param name="payload">The content to be serialized as the body of the PATCH request.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>The updated <typeparamref name="TRecord"/>.</returns>
+    public async Task<TRecord> SendPatch<TRecord>(
         string collectionIdOrName,
         string recordId,
         IDictionary<string, object?> payload,
