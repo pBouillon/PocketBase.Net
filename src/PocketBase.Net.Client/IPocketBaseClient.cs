@@ -66,6 +66,20 @@ public interface IPocketBaseClient
      ) where TRecord : RecordBase;
 
     /// <summary>
+    /// Sends a GET request to the web API to a specified collection to get all records of a collection.
+    /// </summary>
+    /// <remarks>
+    /// <see href="https://pocketbase.io/docs/api-records/#listsearch-records"/>
+    /// </remarks>
+    /// <param name="collectionIdOrName">The id or name of the collection from which the record will be retrieved.</param>
+    /// <param name="cancellation">A cancellation token to cancel the operation.</param>
+    /// <returns>The retrieved records.</returns>
+    Task<Paged<TRecord>> GetRecords<TRecord>(
+        string collectionIdOrName,
+        CancellationToken cancellation = default
+     ) where TRecord : RecordBase;
+
+    /// <summary>
     /// Sends a PATCH request to the web API to a specified collection to update a given record.
     /// </summary>
     /// <remarks>
@@ -122,6 +136,13 @@ public class PocketBaseClient(
         CancellationToken cancellationToken = default
     ) where TRecord : RecordBase
         => httpClientWrapper.SendGet<TRecord>(collectionIdOrName, recordId, cancellationToken);
+
+    /// <inheritdoc/>
+    public Task<Paged<TRecord>> GetRecords<TRecord>(
+        string collectionIdOrName,
+        CancellationToken cancellation = default
+    ) where TRecord : RecordBase
+        => httpClientWrapper.SendGet<TRecord>(collectionIdOrName, cancellation);
 
     /// <inheritdoc/>
     public Task<TRecord> UpdateRecord<TRecord>(

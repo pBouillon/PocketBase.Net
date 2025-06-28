@@ -127,6 +127,17 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
             onErrorThrow: (_) => new RecordSearchFailedException(),
             cancellationToken);
 
+    public Task<Paged<TRecord>> SendGet<TRecord>(
+        string collectionIdOrName,
+        CancellationToken cancellationToken
+    ) where TRecord : RecordBase
+        => SendRequest<Paged<TRecord>>(
+            (httpClient) => httpClient.GetAsync(
+                $"/api/collections/{collectionIdOrName}/records",
+                cancellationToken),
+            onErrorThrow: (_) => new RecordSearchFailedException(),
+            cancellationToken);
+
     /// <summary>
     /// Send a PATCH request to a collection to update an existing record
     /// </summary>
@@ -232,12 +243,16 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
         {
             await HandleUnauthenticatedClient(cancellationToken);
         }
+
         using var response = await request.Invoke(_httpClient);
+        
         if (!response.IsSuccessStatusCode)
         {
             throw onErrorThrow.Invoke(response);
         }
+        
         var rawContent = await response.Content.ReadAsStringAsync(cancellationToken);
+        
         return JsonSerializer.Deserialize<TDeserialized>(rawContent, _jsonSerializerOptions)
             ?? throw new MalformedResponseException<TDeserialized> { Received = rawContent };
     }

@@ -77,6 +77,24 @@ public interface IRepository<TRecord>
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Retrieve all records.
+    /// </summary>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>The retrieved records of type <typeparamref name="TRecord"/>.</returns>
+    Task<Paged<TRecord>> GetRecords(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieve all records. Upon error, invoke <paramref name="onError"/>
+    /// instead of throwing and returns <c>null</c>.
+    /// </summary>
+    /// <param name="onError">An action to execute upon error.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>The retrieved records of type <typeparamref name="TRecord"/>.</returns>
+    Task<Paged<TRecord>?> GetRecords(
+        Action<Exception> onError,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Updates an existing record with the provided payload.
     /// </summary>
     /// <param name="recordId">The ID of the record to update.</param>
@@ -198,6 +216,26 @@ public class Repository<TRecord>(
         catch (Exception exception)
         {
             onError.Invoke(recordId, exception);
+            return null;
+        }
+    }
+
+    /// <inheritdoc/>
+    public Task<Paged<TRecord>> GetRecords(CancellationToken cancellationToken = default)
+        => pocketBaseClient.GetRecords<TRecord>(CollectionName, cancellationToken);
+
+    /// <inheritdoc/>
+    public async Task<Paged<TRecord>?> GetRecords(
+        Action<Exception> onError,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await GetRecords(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            onError.Invoke(ex);
             return null;
         }
     }

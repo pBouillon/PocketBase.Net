@@ -7,38 +7,49 @@ using PocketBase.Net.DependencyInjection;
 
 var services = new ServiceCollection();
 
-services.AddPocketBase(
-    serverUrl: new Uri("http://localhost:8090"),
-    credentials: new PocketBaseClientCredentials
-    {
-        Identity = "technical@account.com",
-        Password = "PleaseDontHackMe",
-        CollectionName = "_superusers",
-    },
-    (pocketBaseConfiguration) =>
-    {
-        pocketBaseConfiguration.RecordOperationBehavior = RecordOperationBehavior.Strict;
+// Register services and configuration
+var container = new ServiceCollection()
+    .AddPocketBase(
+        serverUrl: new Uri("http://localhost:8090"),
+        credentials: new PocketBaseClientCredentials
+        {
+            Identity = "technical@account.com",
+            Password = "PleaseDontHackMe",
+            CollectionName = "_superusers",
+        },
+        (pocketBaseConfiguration) =>
+        {
+            pocketBaseConfiguration.RecordOperationBehavior = RecordOperationBehavior.Strict;
 
-        pocketBaseConfiguration.CollectionNamingPipeline.AppendRule(
-            new ForRecord<AuthorRecord>((_) => "authors")
-        );
-    }).AddPocketBaseRepositories(scanningAssembly: typeof(AuthorRecord).Assembly);
+            pocketBaseConfiguration.CollectionNamingPipeline.AppendRule(
+                new ForRecord<AuthorRecord>((_) => "authors")
+            );
+        })
+    .AddPocketBaseRepositories(scanningAssembly: typeof(AuthorRecord).Assembly)
+    .BuildServiceProvider();
 
-var container = services.BuildServiceProvider();
-
+// Using a repository
 var authorRepository = container.GetRequiredService<IRepository<AuthorRecord>>();
 
+// Creating records
 var maxBrooks = new { Name = "Max Brooks" };
-
 var authorRecord = await authorRepository.CreateRecordFrom(maxBrooks);
 
-var updatedAuthor = await authorRepository.UpdateRecord(
+await authorRepository.CreateRecordFrom(new { Name = "David Foenkinos" });
+
+// Updating a record
+await authorRepository.UpdateRecord(
     authorRecord!.Id,
     maxBrooks with { Name = "M. Brooks" });
 
+// Retrieving a record
 var fetchedAuthor = await authorRepository.GetRecord(authorRecord.Id);
 
-await authorRepository.DeleteRecord(authorRecord.Id);
+// Retrieving many records
+var authorRecords = await authorRepository.GetRecords();
+
+// Delete an item
+authorRecords.Items.ForEach(async item => await authorRepository.DeleteRecord(item.Id));
 
 // --- Definitions ---
 
