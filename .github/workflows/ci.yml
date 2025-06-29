@@ -1,0 +1,37 @@
+name: ci
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Build project
+        run: |
+            dotnet restore src/PocketBase.Net.Client
+            dotnet build src/PocketBase.Net.Client --no-restore --configuration Release
+
+      - name: Build and run unit tests
+        run: |
+          dotnet restore tests/PocketBase.Net.Client.Tests
+          dotnet build tests/PocketBase.Net.Client.Tests --no-restore --configuration Release
+          dotnet test tests/PocketBase.Net.Client.Tests --no-build --configuration Release
+      
+      - name: Build and run integration tests
+        run: |
+          dotnet restore tests/PocketBase.Net.Client.IntegrationTests
+          dotnet build tests/PocketBase.Net.Client.IntegrationTests --no-restore --configuration Release
+          dotnet test tests/PocketBase.Net.Client.IntegrationTests --no-build --configuration Release

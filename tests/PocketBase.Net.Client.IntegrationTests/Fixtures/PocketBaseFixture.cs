@@ -67,6 +67,14 @@ public class PocketBaseFixture : IAsyncLifetime
             .BuildServiceProvider();
     }
 
-    public Task DisposeAsync()
-        => Task.CompletedTask;
+    public async Task DisposeAsync()
+    {
+        await _pocketBaseContainer
+            .StopAsync()
+            .ConfigureAwait(false);
+
+        await _pocketBaseContainer
+            .DisposeAsync()
+            .ConfigureAwait(false);
+    }
 }
