@@ -5,8 +5,6 @@ using PocketBase.Net.Client.Configuration.CollectionNamingRules;
 using PocketBase.Net.Client.Entities.Records;
 using PocketBase.Net.DependencyInjection;
 
-var services = new ServiceCollection();
-
 // Register services and configuration
 var container = new ServiceCollection()
     .AddPocketBase(

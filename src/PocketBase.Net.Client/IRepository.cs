@@ -34,7 +34,7 @@ public interface IRepository<TRecord>
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Delete an existing record..
+    /// Delete an existing record.
     /// </summary>
     /// <param name="recordId">The ID of the record to delete.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
@@ -160,7 +160,7 @@ public class Repository<TRecord>(
     where TRecord : RecordBase
 {
     /// <summary>
-    /// Gets the collecti/// <inheritdoc/>on id or name associated with this repository.
+    /// Gets the collection id or name associated with this repository.
     /// </summary>
     public string CollectionName { get; init; } = configuration.CollectionNamingPipeline.GetCollectionNameOf<TRecord>();
 
