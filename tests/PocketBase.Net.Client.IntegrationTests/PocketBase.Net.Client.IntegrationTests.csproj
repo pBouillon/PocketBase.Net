@@ -13,6 +13,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.6" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="Shouldly" Version="4.3.0" />
     <PackageReference Include="Testcontainers" Version="4.6.0" />
@@ -25,7 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\PocketBase.Net.Client\PocketBase.Net.Client.csproj" />
-    <ProjectReference Include="..\..\src\PocketBase.Net.Demo\PocketBase.Net.Demo.csproj" />
+    <ProjectReference Include="..\..\src\PocketBase.Net.DependencyInjection\PocketBase.Net.DependencyInjection.csproj" />
   </ItemGroup>
 
   <ItemGroup>
