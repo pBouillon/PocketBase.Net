@@ -30,49 +30,68 @@ public class RepositoryTests(PocketBaseFixture fixture)
             .GetRequiredService<IRepository<TodoItemRecord>>();
 
         // Record creation
-        var todoItem = TodoItem.GeneratePendingTodoItem();
-        var created = await repository.CreateRecordFrom(todoItem);
+        var pendingTodoItem = TodoItem.GeneratePendingTodoItem();
+        var pendingTodoItemEntity = await repository.CreateRecordFrom(pendingTodoItem);
 
-        created.ShouldSatisfyAllConditions(
-            () => created.Description.ShouldBe(todoItem.Description),
-            () => created.IsCompleted.ShouldBe(todoItem.IsCompleted));
+        var completedTodoItem = TodoItem.GenerateCompletedTodoItem();
+        var completedTodoItemEntity = await repository.CreateRecordFrom(completedTodoItem);
+
+        pendingTodoItemEntity.ShouldSatisfyAllConditions(
+            () => pendingTodoItemEntity.Description.ShouldBe(pendingTodoItem.Description),
+            () => pendingTodoItemEntity.IsCompleted.ShouldBe(pendingTodoItem.IsCompleted));
 
         // Record fetching
         var fetchedTodoItems = await repository.GetRecords();
         fetchedTodoItems.ShouldSatisfyAllConditions(
-            () => fetchedTodoItems.TotalItems.ShouldBe(1),
-            () => fetchedTodoItems.PageOffset.ShouldBe(1),
-            () => fetchedTodoItems.Items.Count.ShouldBe(1),
-            () => fetchedTodoItems.Items.First().ShouldBeEquivalentTo(created));
+            (todoItems) => todoItems.TotalItems.ShouldBe(2),
+            (todoItems) => todoItems.PageOffset.ShouldBe(1),
+            (todoItems) => todoItems.Items.Count.ShouldBe(2),
+            (todoItems) => todoItems.Items[0].ShouldBeEquivalentTo(pendingTodoItemEntity),
+            (todoItems) => todoItems.Items[1].ShouldBeEquivalentTo(completedTodoItemEntity));
 
-        var fetchedTodoItem = await repository.GetRecord(created.Id);
-        fetchedTodoItem.ShouldBeEquivalentTo(created);
+        var fetchedTodoItem = await repository.GetRecord(pendingTodoItemEntity.Id);
+        fetchedTodoItem.ShouldBeEquivalentTo(pendingTodoItemEntity);
+
+        // Record search
+        var completedTodoItemsSearchFilter = Filter
+            .Field("isCompleted").Equal(true)
+            .Build();
+        
+        var searchedCompletedTodoItems = await repository.GetRecords(filter: completedTodoItemsSearchFilter);
+
+        searchedCompletedTodoItems.ShouldSatisfyAllConditions(
+            (todoItems) => todoItems.TotalItems.ShouldBe(1),
+            (todoItems) => todoItems.PageOffset.ShouldBe(1),
+            (todoItems) => todoItems.Items.Count.ShouldBe(1),
+            (todoItems) => todoItems.Items[0].ShouldBeEquivalentTo(completedTodoItemEntity));
 
         // Record modification
         var updated = await repository.UpdateRecord(
-            created.Id,
+            pendingTodoItemEntity.Id,
             new { IsCompleted = true });
 
         updated.ShouldSatisfyAllConditions(
-            () => updated.Id.ShouldBe(created.Id),
-            () => updated.Created.ShouldBe(created.Created),
-            () => updated.Updated.ShouldNotBe(created.Updated),
+            () => updated.Id.ShouldBe(pendingTodoItemEntity.Id),
+            () => updated.Created.ShouldBe(pendingTodoItemEntity.Created),
+            () => updated.Updated.ShouldNotBe(pendingTodoItemEntity.Updated),
 
             () => updated.IsCompleted.ShouldBeTrue(),
-            () => updated.Description.ShouldBe(todoItem.Description)
+            () => updated.Description.ShouldBe(pendingTodoItem.Description)
         );
 
-        (await repository.GetRecord(created.Id))
+        (await repository.GetRecord(pendingTodoItemEntity.Id))
             .ShouldBeEquivalentTo(updated);
 
         // Record deletion
-        await repository.DeleteRecord(created.Id);
-        _ = Should.ThrowAsync<RecordSearchFailedException>(() => repository.GetRecord(created.Id));
+        await repository.DeleteRecord(pendingTodoItemEntity.Id);
+        await repository.DeleteRecord(completedTodoItemEntity.Id);
+
+        _ = Should.ThrowAsync<RecordSearchFailedException>(() => repository.GetRecord(pendingTodoItemEntity.Id));
 
         fetchedTodoItems = await repository.GetRecords();
         fetchedTodoItems.ShouldSatisfyAllConditions(
-            () => fetchedTodoItems.TotalItems.ShouldBe(0),
-            () => fetchedTodoItems.PageOffset.ShouldBe(1),
-            () => fetchedTodoItems.Items.ShouldBeEmpty());
+            (todoItems) => todoItems.TotalItems.ShouldBe(0),
+            (todoItems) => todoItems.PageOffset.ShouldBe(1),
+            (todoItems) => todoItems.Items.ShouldBeEmpty());
     }
 }

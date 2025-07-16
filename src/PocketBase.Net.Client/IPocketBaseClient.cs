@@ -72,10 +72,12 @@ public interface IPocketBaseClient
     /// <see href="https://pocketbase.io/docs/api-records/#listsearch-records"/>
     /// </remarks>
     /// <param name="collectionIdOrName">The id or name of the collection from which the record will be retrieved.</param>
+    /// <param name="filter">An optional filter to apply on the search result.</param>
     /// <param name="cancellation">A cancellation token to cancel the operation.</param>
     /// <returns>The retrieved records.</returns>
     Task<Paged<TRecord>> GetRecords<TRecord>(
         string collectionIdOrName,
+        string? filter = null,
         CancellationToken cancellation = default
      ) where TRecord : RecordBase;
 
@@ -117,9 +119,9 @@ public class PocketBaseClient(
     public Task<TRecord> CreateRecord<TPayload, TRecord>(
         string collectionIdOrName,
         TPayload payload,
-        CancellationToken cancellation = default
+        CancellationToken cancellationToken = default
     ) where TRecord : RecordBase
-        => httpClientWrapper.SendPost<TPayload, TRecord>(collectionIdOrName, payload, cancellation);
+        => httpClientWrapper.SendPost<TPayload, TRecord>(collectionIdOrName, payload, cancellationToken);
 
     /// <inheritdoc/>
     public Task DeleteRecord(
@@ -135,21 +137,25 @@ public class PocketBaseClient(
         string recordId,
         CancellationToken cancellationToken = default
     ) where TRecord : RecordBase
-        => httpClientWrapper.SendGet<TRecord>(collectionIdOrName, recordId, cancellationToken);
+        => httpClientWrapper.SendGetById<TRecord>(collectionIdOrName, recordId, cancellationToken);
 
     /// <inheritdoc/>
     public Task<Paged<TRecord>> GetRecords<TRecord>(
         string collectionIdOrName,
-        CancellationToken cancellation = default
+        string? filter = null,
+        CancellationToken cancellationToken = default
     ) where TRecord : RecordBase
-        => httpClientWrapper.SendGet<TRecord>(collectionIdOrName, cancellation);
+        => httpClientWrapper.SendGet<TRecord>(
+            collectionIdOrName,
+            filter,
+            cancellationToken);
 
     /// <inheritdoc/>
     public Task<TRecord> UpdateRecord<TRecord>(
         string collectionIdOrName,
         string recordId,
         IDictionary<string, object?> payload,
-        CancellationToken cancellation = default
+        CancellationToken cancellationToken = default
     ) where TRecord : RecordBase
-        => httpClientWrapper.SendPatch<TRecord>(collectionIdOrName, recordId, payload, cancellation);
+        => httpClientWrapper.SendPatch<TRecord>(collectionIdOrName, recordId, payload, cancellationToken);
 }

@@ -115,10 +115,10 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
     /// <param name="recordId">The id of the record to retrieve.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The retrieved <typeparamref name="TRecord"/>.</returns>
-    public Task<TRecord> SendGet<TRecord>(
+    public Task<TRecord> SendGetById<TRecord>(
         string collectionIdOrName,
         string recordId,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken = default
      ) where TRecord : RecordBase
         => SendRequest<TRecord>(
             (httpClient) => httpClient.GetAsync(
@@ -129,14 +129,22 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
 
     public Task<Paged<TRecord>> SendGet<TRecord>(
         string collectionIdOrName,
-        CancellationToken cancellationToken
+        string? filter = null,
+        CancellationToken cancellationToken = default
     ) where TRecord : RecordBase
-        => SendRequest<Paged<TRecord>>(
-            (httpClient) => httpClient.GetAsync(
-                $"/api/collections/{collectionIdOrName}/records",
-                cancellationToken),
-            onErrorThrow: (_) => new RecordSearchFailedException(),
-            cancellationToken);
+    {
+        var query = $"/api/collections/{collectionIdOrName}/records";
+
+        if (!string.IsNullOrEmpty(filter))
+        {
+            query += $"?filter={filter}";
+        }
+
+        return SendRequest<Paged<TRecord>>(
+                (httpClient) => httpClient.GetAsync(query, cancellationToken),
+                onErrorThrow: (_) => new RecordSearchFailedException(),
+                cancellationToken);
+    }
 
     /// <summary>
     /// Send a PATCH request to a collection to update an existing record
@@ -245,14 +253,14 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
         }
 
         using var response = await request.Invoke(_httpClient);
-        
+
         if (!response.IsSuccessStatusCode)
         {
             throw onErrorThrow.Invoke(response);
         }
-        
+
         var rawContent = await response.Content.ReadAsStringAsync(cancellationToken);
-        
+
         return JsonSerializer.Deserialize<TDeserialized>(rawContent, _jsonSerializerOptions)
             ?? throw new MalformedResponseException<TDeserialized> { Received = rawContent };
     }
