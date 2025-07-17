@@ -1,4 +1,5 @@
 ﻿using PocketBase.Net.Client.Configuration;
+using PocketBase.Net.Client.Entities;
 using PocketBase.Net.Client.Entities.Records;
 using System.Collections.Immutable;
 
@@ -80,9 +81,13 @@ public interface IRepository<TRecord>
     /// Retrieve all records.
     /// </summary>
     /// <param name="filter">An optional filter to apply on the search result.</param>
+    /// <param name="paginationOptions">An optional pagination on the search result.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The retrieved records of type <typeparamref name="TRecord"/>.</returns>
-    Task<Paged<TRecord>> GetRecords(string? filter = null, CancellationToken cancellationToken = default);
+    Task<Paged<TRecord>> GetRecords(
+        string? filter = null,
+        PaginationOptions? paginationOptions = null,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieve all records. Upon error, invoke <paramref name="onError"/>
@@ -90,11 +95,13 @@ public interface IRepository<TRecord>
     /// </summary>
     /// <param name="onError">An action to execute upon error.</param>
     /// <param name="filter">An optional filter to apply on the search result.</param>
+    /// <param name="paginationOptions">An optional pagination on the search result.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The retrieved records of type <typeparamref name="TRecord"/>.</returns>
     Task<Paged<TRecord>?> GetRecords(
         Action<Exception> onError,
         string? filter = null,
+        PaginationOptions? paginationOptions = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -226,18 +233,20 @@ public class Repository<TRecord>(
     /// <inheritdoc/>
     public Task<Paged<TRecord>> GetRecords(
         string? filter = null,
+        PaginationOptions? paginationOptions = null,
         CancellationToken cancellationToken = default)
-        => pocketBaseClient.GetRecords<TRecord>(CollectionName, filter, cancellationToken);
+        => pocketBaseClient.GetRecords<TRecord>(CollectionName, filter, paginationOptions, cancellationToken);
 
     /// <inheritdoc/>
     public async Task<Paged<TRecord>?> GetRecords(
         Action<Exception> onError,
         string? filter = null,
+        PaginationOptions? paginationOptions = null,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            return await GetRecords(filter, cancellationToken);
+            return await GetRecords(filter, paginationOptions, cancellationToken);
         }
         catch (Exception ex)
         {

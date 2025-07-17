@@ -1,4 +1,5 @@
 ﻿using PocketBase.Net.Client.Configuration;
+using PocketBase.Net.Client.Entities;
 using PocketBase.Net.Client.Entities.Records;
 using PocketBase.Net.Client.Entities.Users;
 
@@ -73,11 +74,13 @@ public interface IPocketBaseClient
     /// </remarks>
     /// <param name="collectionIdOrName">The id or name of the collection from which the record will be retrieved.</param>
     /// <param name="filter">An optional filter to apply on the search result.</param>
+    /// <param name="paginationOptions">An optional pagination on the search result.</param>
     /// <param name="cancellation">A cancellation token to cancel the operation.</param>
     /// <returns>The retrieved records.</returns>
     Task<Paged<TRecord>> GetRecords<TRecord>(
         string collectionIdOrName,
         string? filter = null,
+        PaginationOptions? paginationOptions = null,
         CancellationToken cancellation = default
      ) where TRecord : RecordBase;
 
@@ -143,11 +146,13 @@ public class PocketBaseClient(
     public Task<Paged<TRecord>> GetRecords<TRecord>(
         string collectionIdOrName,
         string? filter = null,
+        PaginationOptions? paginationOptions = null,
         CancellationToken cancellationToken = default
     ) where TRecord : RecordBase
         => httpClientWrapper.SendGet<TRecord>(
             collectionIdOrName,
             filter,
+            paginationOptions,
             cancellationToken);
 
     /// <inheritdoc/>

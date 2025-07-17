@@ -17,7 +17,7 @@ public record Paged<TRecord> where TRecord : RecordBase
     /// Gets the offset (number of items to skip) for the current page, corresponding to the "page" field in the JSON response from PocketBase.
     /// </summary>
     [JsonPropertyName("page")]
-    public int PageOffset { get; init; } = 0;
+    public int PageNumber { get; init; } = 0;
 
     /// <summary>
     /// Gets the number of items per page, corresponding to the "perPage" field in the JSON response.
