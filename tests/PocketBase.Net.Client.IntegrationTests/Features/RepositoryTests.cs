@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using PocketBase.Net.Client.Entities.Filter;
 using PocketBase.Net.Client.Exceptions;
 using PocketBase.Net.Client.IntegrationTests.Fixtures;
 using PocketBase.Net.Client.IntegrationTests.Utilities;

@@ -1,4 +1,5 @@
-﻿using Shouldly;
+﻿using PocketBase.Net.Client.Entities.Filter;
+using Shouldly;
 
 namespace PocketBase.Net.Client.Tests;
 
