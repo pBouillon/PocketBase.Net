@@ -1,6 +1,7 @@
 ﻿using PocketBase.Net.Client.Configuration;
 using PocketBase.Net.Client.Entities;
 using PocketBase.Net.Client.Entities.Records;
+using PocketBase.Net.Client.Entities.Repository;
 using System.Collections.Immutable;
 
 namespace PocketBase.Net.Client;
@@ -80,13 +81,11 @@ public interface IRepository<TRecord>
     /// <summary>
     /// Retrieve all records.
     /// </summary>
-    /// <param name="filter">An optional filter to apply on the search result.</param>
-    /// <param name="paginationOptions">An optional pagination on the search result.</param>
+    /// <param name="query">An optional query to apply on the search</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The retrieved records of type <typeparamref name="TRecord"/>.</returns>
     Task<Paged<TRecord>> GetRecords(
-        string? filter = null,
-        PaginationOptions? paginationOptions = null,
+        Query<TRecord>? query = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -94,15 +93,19 @@ public interface IRepository<TRecord>
     /// instead of throwing and returns <c>null</c>.
     /// </summary>
     /// <param name="onError">An action to execute upon error.</param>
-    /// <param name="filter">An optional filter to apply on the search result.</param>
-    /// <param name="paginationOptions">An optional pagination on the search result.</param>
+    /// <param name="query">An optional query to apply on the search</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The retrieved records of type <typeparamref name="TRecord"/>.</returns>
     Task<Paged<TRecord>?> GetRecords(
         Action<Exception> onError,
-        string? filter = null,
-        PaginationOptions? paginationOptions = null,
+        Query<TRecord>? query,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Creates a new <see cref="QueryBuilder{TRecord}"/> instance for constructing and executing queries.
+    /// </summary>
+    /// <returns>A new instance of <see cref="QueryBuilder{TRecord}"/> for building queries using a fluent interface.</returns>
+    QueryBuilder<TRecord> Query();
 
     /// <summary>
     /// Updates an existing record with the provided payload.
@@ -174,6 +177,8 @@ public class Repository<TRecord>(
     /// </summary>
     public string CollectionName { get; init; } = configuration.CollectionNamingPipeline.GetCollectionNameOf<TRecord>();
 
+    public QueryBuilder<TRecord> Query() => new (this);
+
     /// <inheritdoc/>
     public Task<TRecord> CreateRecordFrom<TPayload>(TPayload payload, CancellationToken cancellationToken = default)
         => pocketBaseClient.CreateRecord<TPayload, TRecord>(CollectionName, payload, cancellationToken);
@@ -232,21 +237,19 @@ public class Repository<TRecord>(
 
     /// <inheritdoc/>
     public Task<Paged<TRecord>> GetRecords(
-        string? filter = null,
-        PaginationOptions? paginationOptions = null,
+        Query<TRecord>? query,
         CancellationToken cancellationToken = default)
-        => pocketBaseClient.GetRecords<TRecord>(CollectionName, filter, paginationOptions, cancellationToken);
+        => pocketBaseClient.GetRecords<TRecord>(CollectionName, query?.Filter, query?.PaginationOptions, cancellationToken);
 
     /// <inheritdoc/>
     public async Task<Paged<TRecord>?> GetRecords(
         Action<Exception> onError,
-        string? filter = null,
-        PaginationOptions? paginationOptions = null,
+        Query<TRecord>? query,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            return await GetRecords(filter, paginationOptions, cancellationToken);
+            return await GetRecords(query, cancellationToken);
         }
         catch (Exception ex)
         {

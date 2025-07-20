@@ -59,7 +59,10 @@ public class RepositoryTests(PocketBaseFixture fixture)
             .Field("isCompleted").Equal(true)
             .Build();
 
-        var searchedCompletedTodoItems = await repository.GetRecords(filter: completedTodoItemsSearchFilter);
+        var searchedCompletedTodoItems = await repository
+            .Query()
+            .WithFilter(completedTodoItemsSearchFilter)
+            .ExecuteAsync();
 
         searchedCompletedTodoItems.ShouldSatisfyAllConditions(
             (todoItems) => todoItems.TotalItems.ShouldBe(1),
@@ -68,16 +71,36 @@ public class RepositoryTests(PocketBaseFixture fixture)
             (todoItems) => todoItems.Items[0].ShouldBeEquivalentTo(completedTodoItemEntity));
 
         // Records pagination
-        var singlePagedTodoItems = await repository.GetRecords(paginationOptions: new PaginationOptions
-        {
-            ItemsPerPage = 1,
-            PageNumber = 2,
-        });
+        var singlePagedTodoItems = await repository
+            .Query()
+            .WithPagination(new PaginationOptions
+            {
+                ItemsPerPage = 1,
+                PageNumber = 2,
+            })
+            .ExecuteAsync();
 
         singlePagedTodoItems.ShouldSatisfyAllConditions(
-            todoItems => todoItems.TotalItems.ShouldBe(2),
-            todoItems => todoItems.PageNumber.ShouldBe(2),
-            todoItems => todoItems.Items.Count.ShouldBe(1));
+            (todoItems) => todoItems.TotalItems.ShouldBe(2),
+            (todoItems) => todoItems.PageNumber.ShouldBe(2),
+            (todoItems) => todoItems.Items.Count.ShouldBe(1));
+
+        // Pagination and search
+        var singlePagedCompletedTodoItem = await repository
+            .Query()
+            .WithFilter(completedTodoItemsSearchFilter)
+            .WithPagination(new PaginationOptions
+            {
+                ItemsPerPage = 1,
+                PageNumber = 1,
+            })
+            .ExecuteAsync();
+
+        singlePagedCompletedTodoItem.ShouldSatisfyAllConditions(
+            (todoItems) => todoItems.TotalItems.ShouldBe(1),
+            (todoItems) => todoItems.PageNumber.ShouldBe(1),
+            (todoItems) => todoItems.Items.Count.ShouldBe(1),
+            (todoItems) => todoItems.Items[0].ShouldBeEquivalentTo(completedTodoItemEntity));
 
         // Record modification
         var updated = await repository.UpdateRecord(

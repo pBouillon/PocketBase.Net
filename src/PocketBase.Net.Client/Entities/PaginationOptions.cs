@@ -7,6 +7,11 @@
 public sealed record PaginationOptions
 {
     /// <summary>
+    /// Default pagination options.
+    /// </summary>
+    public static readonly PaginationOptions Default = new();
+
+    /// <summary>
     /// Gets the page number to retrieve.
     /// </summary>
     /// <remarks>
