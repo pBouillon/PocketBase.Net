@@ -1,4 +1,5 @@
 ﻿using PocketBase.Net.Client.Configuration;
+using PocketBase.Net.Client.Entities;
 using PocketBase.Net.Client.Entities.Records;
 using PocketBase.Net.Client.Entities.Users;
 using PocketBase.Net.Client.Exceptions;
@@ -34,6 +35,25 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
     /// Indicates if the client is currently authenticated based on the existence of the <c>Authorization</c> request header.
     /// </summary>
     public bool IsAuthenticated => _httpClient.DefaultRequestHeaders.Authorization is not null;
+
+    /// <summary>
+    /// Appends query parameters to a root URL string.
+    /// </summary>
+    /// <param name="root">The base URL.</param>
+    /// <param name="queryParameters">Query parameters to append, with null values filtered out.</param>
+    /// <returns>The root URL with appended query parameters.</returns>
+    private static string AppendQueryParameters(string root, params string?[] queryParameters)
+    {
+        var toAppend = queryParameters
+            .Where(queryParameter => !string.IsNullOrEmpty(queryParameter))
+            .ToArray();
+
+        return toAppend.Length == 0
+            ? root
+            : root + '?' + toAppend[1..].Aggregate(
+                seed: toAppend[0],
+                (current, queryParameter) => $"{current}&{queryParameter}");
+    }
 
     /// <summary>
     /// Authenticate the current <see cref="PocketBaseHttpClientWrapper"/> with the provided <paramref name="credentials"/>.
@@ -130,15 +150,14 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
     public Task<Paged<TRecord>> SendGet<TRecord>(
         string collectionIdOrName,
         string? filter = null,
+        PaginationOptions? paginationOptions = null,
         CancellationToken cancellationToken = default
     ) where TRecord : RecordBase
     {
-        var query = $"/api/collections/{collectionIdOrName}/records";
-
-        if (!string.IsNullOrEmpty(filter))
-        {
-            query += $"?filter={filter}";
-        }
+        var query = AppendQueryParameters(
+            $"/api/collections/{collectionIdOrName}/records",
+            string.IsNullOrEmpty(filter) ? null : $"filter=({filter})",
+            paginationOptions?.ToQueryParameters());
 
         return SendRequest<Paged<TRecord>>(
                 (httpClient) => httpClient.GetAsync(query, cancellationToken),
