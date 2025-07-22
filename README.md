@@ -1,4 +1,16 @@
-# PocketBase.Net
+<p align="center">
+    <img
+        height="150px"
+        width="150px"
+        src="https://github.com/user-attachments/assets/3840c148-4d15-40b2-a31a-0719040eda8d"
+        alt="PocketBase.Net - PocketBase integration made simple for .NET projects" />
+</p>
+
+<div align="center">
+    <p>PocketBase integration made simple for .NET projects</p>
+</div>
+
+---
 
 > [!WARNING]
 > PocketBase.Net is still under active development and the public API may change.
