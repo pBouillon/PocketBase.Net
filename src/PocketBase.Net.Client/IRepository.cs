@@ -239,7 +239,12 @@ public class Repository<TRecord>(
     public Task<Paged<TRecord>> GetRecords(
         Query<TRecord>? query,
         CancellationToken cancellationToken = default)
-        => pocketBaseClient.GetRecords<TRecord>(CollectionName, query?.Filter, query?.PaginationOptions, cancellationToken);
+        => pocketBaseClient.GetRecords<TRecord>(
+            CollectionName,
+            query?.Filter,
+            query?.PaginationOptions,
+            query?.Sorting,
+            cancellationToken);
 
     /// <inheritdoc/>
     public async Task<Paged<TRecord>?> GetRecords(

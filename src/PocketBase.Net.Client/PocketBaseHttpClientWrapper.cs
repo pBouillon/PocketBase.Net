@@ -50,9 +50,7 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
 
         return toAppend.Length == 0
             ? root
-            : root + '?' + toAppend[1..].Aggregate(
-                seed: toAppend[0],
-                (current, queryParameter) => $"{current}&{queryParameter}");
+            : root + '?' + string.Join('&', toAppend);
     }
 
     /// <summary>
@@ -151,12 +149,14 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
         string collectionIdOrName,
         string? filter = null,
         PaginationOptions? paginationOptions = null,
+        string? sorting = null,
         CancellationToken cancellationToken = default
     ) where TRecord : RecordBase
     {
         var query = AppendQueryParameters(
             $"/api/collections/{collectionIdOrName}/records",
             string.IsNullOrEmpty(filter) ? null : $"filter=({filter})",
+            string.IsNullOrEmpty(sorting) ? null : $"sort={sorting}",
             paginationOptions?.ToQueryParameters());
 
         return SendRequest<Paged<TRecord>>(
