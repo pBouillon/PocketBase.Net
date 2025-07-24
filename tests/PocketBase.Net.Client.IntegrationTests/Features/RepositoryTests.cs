@@ -102,6 +102,25 @@ public class RepositoryTests(PocketBaseFixture fixture)
             (todoItems) => todoItems.Items.Count.ShouldBe(1),
             (todoItems) => todoItems.Items[0].ShouldBeEquivalentTo(completedTodoItemEntity));
 
+    // Sorting results
+    var todoItemsByDescendingStatusThenByAlphabeticalOrder = await repository
+        .Query()
+        .WithSorting("-isCompleted,description")
+        .ExecuteAsync();
+
+    todoItemsByDescendingStatusThenByAlphabeticalOrder.ShouldSatisfyAllConditions(
+        (todoItems) => todoItems.Items[0].ShouldBeEquivalentTo(completedTodoItemEntity),
+        (todoItems) => todoItems.Items[1].ShouldBeEquivalentTo(pendingTodoItemEntity));
+
+    var todoItemsByStatusThenByDescendingAlphabeticalOrder = await repository
+        .Query()
+        .WithSorting("isCompleted,-description")
+        .ExecuteAsync();
+
+    todoItemsByStatusThenByDescendingAlphabeticalOrder.ShouldSatisfyAllConditions(
+        (todoItems) => todoItems.Items[0].ShouldBeEquivalentTo(pendingTodoItemEntity),
+        (todoItems) => todoItems.Items[1].ShouldBeEquivalentTo(completedTodoItemEntity));
+
         // Record modification
         var updated = await repository.UpdateRecord(
             pendingTodoItemEntity.Id,

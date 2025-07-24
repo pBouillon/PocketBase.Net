@@ -18,4 +18,9 @@ public sealed record Query<TRecord>
     /// Pagination options for the query. Defaults to a <see cref="PaginationOptions.Default"/>.
     /// </summary>
     public PaginationOptions PaginationOptions { get; init; } = PaginationOptions.Default;
+
+    /// <summary>
+    /// Sorting to apply on the search results. Defaults to an empty string.
+    /// </summary>
+    public string Sorting { get; init; } = string.Empty;
 }

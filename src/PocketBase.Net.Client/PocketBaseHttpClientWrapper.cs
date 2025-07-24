@@ -147,23 +147,25 @@ public sealed class PocketBaseHttpClientWrapper(PocketBaseClientConfiguration co
             onErrorThrow: (_) => new RecordSearchFailedException(),
             cancellationToken);
 
-    public Task<Paged<TRecord>> SendGet<TRecord>(
-        string collectionIdOrName,
-        string? filter = null,
-        PaginationOptions? paginationOptions = null,
-        CancellationToken cancellationToken = default
-    ) where TRecord : RecordBase
-    {
-        var query = AppendQueryParameters(
-            $"/api/collections/{collectionIdOrName}/records",
-            string.IsNullOrEmpty(filter) ? null : $"filter=({filter})",
-            paginationOptions?.ToQueryParameters());
+public Task<Paged<TRecord>> SendGet<TRecord>(
+    string collectionIdOrName,
+    string? filter = null,
+    PaginationOptions? paginationOptions = null,
+    string? sorting = null,
+    CancellationToken cancellationToken = default
+) where TRecord : RecordBase
+{
+    var query = AppendQueryParameters(
+        $"/api/collections/{collectionIdOrName}/records",
+        string.IsNullOrEmpty(filter) ? null : $"filter=({filter})",
+        string.IsNullOrEmpty(sorting) ? null : $"sort={sorting}",
+        paginationOptions?.ToQueryParameters());
 
-        return SendRequest<Paged<TRecord>>(
-                (httpClient) => httpClient.GetAsync(query, cancellationToken),
-                onErrorThrow: (_) => new RecordSearchFailedException(),
-                cancellationToken);
-    }
+    return SendRequest<Paged<TRecord>>(
+            (httpClient) => httpClient.GetAsync(query, cancellationToken),
+            onErrorThrow: (_) => new RecordSearchFailedException(),
+            cancellationToken);
+}
 
     /// <summary>
     /// Send a PATCH request to a collection to update an existing record

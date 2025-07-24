@@ -75,14 +75,16 @@ public interface IPocketBaseClient
     /// <param name="collectionIdOrName">The id or name of the collection from which the record will be retrieved.</param>
     /// <param name="filter">An optional filter to apply on the search result.</param>
     /// <param name="paginationOptions">An optional pagination on the search result.</param>
+    /// <param name="sorting">An optional sort to apply on the search result.</param>
     /// <param name="cancellation">A cancellation token to cancel the operation.</param>
     /// <returns>The retrieved records.</returns>
     Task<Paged<TRecord>> GetRecords<TRecord>(
         string collectionIdOrName,
         string? filter = null,
         PaginationOptions? paginationOptions = null,
+        string? sorting = null,
         CancellationToken cancellation = default
-     ) where TRecord : RecordBase;
+    ) where TRecord : RecordBase;
 
     /// <summary>
     /// Sends a PATCH request to the web API to a specified collection to update a given record.
@@ -147,12 +149,14 @@ public class PocketBaseClient(
         string collectionIdOrName,
         string? filter = null,
         PaginationOptions? paginationOptions = null,
+        string? sorting = null,
         CancellationToken cancellationToken = default
     ) where TRecord : RecordBase
         => httpClientWrapper.SendGet<TRecord>(
             collectionIdOrName,
             filter,
             paginationOptions,
+            sorting,
             cancellationToken);
 
     /// <inheritdoc/>

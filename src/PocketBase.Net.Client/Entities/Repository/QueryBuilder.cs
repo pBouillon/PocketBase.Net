@@ -1,4 +1,5 @@
-﻿using PocketBase.Net.Client.Entities.Records;
+﻿using PocketBase.Net.Client.Entities.Filter;
+using PocketBase.Net.Client.Entities.Records;
 
 namespace PocketBase.Net.Client.Entities.Repository;
 
@@ -39,6 +40,17 @@ public sealed class QueryBuilder<TRecord>(IRepository<TRecord> Repository)
     public QueryBuilder<TRecord> WithPagination(PaginationOptions paginationOptions)
     {
         _query = _query with { PaginationOptions = paginationOptions };
+        return this;
+    }
+
+    /// <summary>
+    /// Defines how the results should be sorted for the query.
+    /// </summary>
+    /// <param name="sorting">The sorting to apply.</param>
+    /// <returns>The builder instance for method chaining.</returns>
+    public QueryBuilder<TRecord> WithSorting(string sorting)
+    {
+        _query = _query with { Sorting = sorting };
         return this;
     }
 
