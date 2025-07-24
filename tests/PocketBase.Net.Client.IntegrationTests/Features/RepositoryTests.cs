@@ -102,24 +102,34 @@ public class RepositoryTests(PocketBaseFixture fixture)
             (todoItems) => todoItems.Items.Count.ShouldBe(1),
             (todoItems) => todoItems.Items[0].ShouldBeEquivalentTo(completedTodoItemEntity));
 
-    // Sorting results
-    var todoItemsByDescendingStatusThenByAlphabeticalOrder = await repository
-        .Query()
-        .WithSorting("-isCompleted,description")
-        .ExecuteAsync();
+        // Sorting results
+        var sortByStatusDescendingThenName = Sort
+            .ByDescending("isCompleted")
+            .ThenBy("description")
+            .Build();
 
-    todoItemsByDescendingStatusThenByAlphabeticalOrder.ShouldSatisfyAllConditions(
-        (todoItems) => todoItems.Items[0].ShouldBeEquivalentTo(completedTodoItemEntity),
-        (todoItems) => todoItems.Items[1].ShouldBeEquivalentTo(pendingTodoItemEntity));
+        var todoItemsByStatusDescendingThenName = await repository
+            .Query()
+            .WithSorting(sortByStatusDescendingThenName)
+            .ExecuteAsync();
 
-    var todoItemsByStatusThenByDescendingAlphabeticalOrder = await repository
-        .Query()
-        .WithSorting("isCompleted,-description")
-        .ExecuteAsync();
+        todoItemsByStatusDescendingThenName.ShouldSatisfyAllConditions(
+            (items) => items.Items[0].ShouldBeEquivalentTo(completedTodoItemEntity),
+            (items) => items.Items[1].ShouldBeEquivalentTo(pendingTodoItemEntity));
 
-    todoItemsByStatusThenByDescendingAlphabeticalOrder.ShouldSatisfyAllConditions(
-        (todoItems) => todoItems.Items[0].ShouldBeEquivalentTo(pendingTodoItemEntity),
-        (todoItems) => todoItems.Items[1].ShouldBeEquivalentTo(completedTodoItemEntity));
+        var sortByStatusThenNameDescending = Sort
+            .By("isCompleted")
+            .ThenByDescending("description")
+            .Build();
+
+        var todoItemsByStatusThenNameDescending = await repository
+            .Query()
+            .WithSorting(sortByStatusThenNameDescending)
+            .ExecuteAsync();
+
+        todoItemsByStatusThenNameDescending.ShouldSatisfyAllConditions(
+            (items) => items.Items[0].ShouldBeEquivalentTo(pendingTodoItemEntity),
+            (items) => items.Items[1].ShouldBeEquivalentTo(completedTodoItemEntity));
 
         // Record modification
         var updated = await repository.UpdateRecord(
