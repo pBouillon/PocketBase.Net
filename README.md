@@ -185,7 +185,7 @@ A few transformations are already provided by the library:
 
 > [!WARNING]
 > Some features available in the PocketBase web API are not yet implemented.
-> For example, relationships, selected fields, ordering and other things are not yet supported but should be in a near future.
+> For example, relationships, selected fields and other things are not yet supported but should be in a near future.
 
 Using the repository, you can list the records in the collection using `GetRecords`:
 
@@ -221,6 +221,22 @@ var relevantPublicArticlesFilter = Filter
 var relevantPublicArticles = await articleRepository
     .Query()
     .WithFilter(relevantPublicArticlesFilter)
+    .ExecuteAsync();
+```
+
+In the same way, you can also specify how you would like your result sorted, either by directly providing the string,
+or by using the provided `SortBuilder`:
+
+```csharp
+// 👇 Equivalent to `-createdOn,name`
+var oldestFirstSort = Sort
+    .ByDescending("createdOn")
+    .ThenBy("title")
+    .Build();
+
+var articlesByCreationDate = await articleRepository
+    .Query()
+    .WithSorting(oldestFirstSort)
     .ExecuteAsync();
 ```
 
