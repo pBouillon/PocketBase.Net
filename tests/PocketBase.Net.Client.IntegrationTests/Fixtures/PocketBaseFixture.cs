@@ -72,9 +72,5 @@ public class PocketBaseFixture : IAsyncLifetime
         await _pocketBaseContainer
             .StopAsync()
             .ConfigureAwait(false);
-
-        await _pocketBaseContainer
-            .DisposeAsync()
-            .ConfigureAwait(false);
     }
 }
